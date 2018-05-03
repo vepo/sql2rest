@@ -7,11 +7,12 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.vepo.SQLData.GroupWhereStatement;
-import org.vepo.SQLData.Joiner;
-import org.vepo.SQLData.ListWhereStatement;
-import org.vepo.SQLData.WhereClause;
-import org.vepo.SQLData.WhereStatement;
+import org.vepo.SQLTreeWalker.GroupWhereStatement;
+import org.vepo.SQLTreeWalker.Joiner;
+import org.vepo.SQLTreeWalker.ListWhereStatement;
+import org.vepo.SQLTreeWalker.SQLData;
+import org.vepo.SQLTreeWalker.WhereClause;
+import org.vepo.SQLTreeWalker.WhereStatement;
 
 public class SQL2Rest {
 	/**
@@ -27,8 +28,9 @@ public class SQL2Rest {
 		SQLParser parser = new SQLParser(tokens);
 		ParseTree tree = parser.query();
 		ParseTreeWalker walker = new ParseTreeWalker();
-		SQLData data = new SQLData();
-		walker.walk(data, tree);
+		SQLTreeWalker treeWalker = new SQLTreeWalker();
+		walker.walk(treeWalker, tree);
+		SQLData data = treeWalker.getData();
 		return "/" + data.getTableName().toLowerCase() + toRest(data.getWhereStatement());
 	}
 

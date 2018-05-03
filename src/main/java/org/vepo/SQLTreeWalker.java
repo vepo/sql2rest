@@ -9,16 +9,7 @@ import org.vepo.SQLParser.GroupedWhereClauseContext;
 import org.vepo.SQLParser.QueryClauseContext;
 import org.vepo.SQLParser.WhereExprContext;
 
-public class SQLData extends SQLBaseListener {
-	public enum Joiner {
-		AND, OR
-	}
-
-	private String tableName;
-
-	public abstract class WhereStatement {
-
-	}
+public class SQLTreeWalker extends SQLBaseListener {
 
 	public class GroupWhereStatement extends WhereStatement {
 		private final WhereStatement where;
@@ -32,24 +23,40 @@ public class SQLData extends SQLBaseListener {
 		}
 	}
 
+	public enum Joiner {
+		AND, OR
+	}
+
 	public class ListWhereStatement extends WhereStatement {
 		private final List<WhereStatement> statements;
 		private final List<Joiner> joiner;
 
 		public ListWhereStatement(List<WhereStatement> statements, List<Joiner> joiner) {
-			super();
 			this.statements = statements;
 			this.joiner = joiner;
-		}
-
-		public List<WhereStatement> getStatements() {
-			return new ArrayList<>(statements);
 		}
 
 		public List<Joiner> getJoiner() {
 			return new ArrayList<>(joiner);
 		}
 
+		public List<WhereStatement> getStatements() {
+			return new ArrayList<>(statements);
+		}
+
+	}
+
+	public class SQLData {
+		private Optional<WhereStatement> whereStatement;
+		private String tableName;
+
+		public String getTableName() {
+			return tableName;
+		}
+
+		public Optional<WhereStatement> getWhereStatement() {
+			return whereStatement;
+		}
 	}
 
 	public class WhereClause extends WhereStatement {
@@ -78,15 +85,23 @@ public class SQLData extends SQLBaseListener {
 
 	}
 
-	private Optional<WhereStatement> whereStatement;
+	public abstract class WhereStatement {
+
+	}
+
+	private final SQLData data = new SQLData();
 
 	public void enterQuery(SQLParser.QueryContext ctx) {
-		tableName = ctx.tableName().getText();
+		data.tableName = ctx.tableName().getText();
 		if (null != ctx.whereExpr()) {
-			this.whereStatement = Optional.of(process(ctx.whereExpr()));
+			this.data.whereStatement = Optional.of(process(ctx.whereExpr()));
 		} else {
-			this.whereStatement = Optional.empty();
+			this.data.whereStatement = Optional.empty();
 		}
+	}
+
+	public SQLData getData() {
+		return data;
 	}
 
 	private WhereStatement process(WhereExprContext whereExpr) {
@@ -99,16 +114,9 @@ public class SQLData extends SQLBaseListener {
 		} else {
 			return new ListWhereStatement(
 					whereExpr.whereExpr().stream().map(exp -> process(exp)).collect(Collectors.toList()),
-					whereExpr.booleanOperator().stream().map(b -> Joiner.valueOf(b.getText()))
+					whereExpr.booleanOperator().stream().map(b -> Joiner.valueOf(b.getText().toUpperCase()))
 							.collect(Collectors.toList()));
 		}
 	}
 
-	public String getTableName() {
-		return tableName;
-	}
-
-	public Optional<WhereStatement> getWhereStatement() {
-		return whereStatement;
-	}
 }
