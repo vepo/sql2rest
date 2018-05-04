@@ -25,6 +25,15 @@ fields
 queryClause
 :
 	field operator value
+	| field operator field
+	| value operator value
+	| field operator subQuery
+;
+
+subQuery
+:
+	'(' query ')'
+	| query
 ;
 
 value
