@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.RuleContext;
-import org.vepo.sql2rest.SQLBaseListener;
-import org.vepo.sql2rest.SQLParser;
 import org.vepo.sql2rest.SQLParser.GroupedWhereClauseContext;
 import org.vepo.sql2rest.SQLParser.QueryClauseContext;
 import org.vepo.sql2rest.SQLParser.QueryContext;
@@ -107,20 +105,19 @@ public class SQLTreeWalker extends SQLBaseListener {
 		public T resolve(String data);
 	}
 
-	public class LazyWhereStatement<T extends WhereStatement> extends WhereStatement implements Lazy {
-		private boolean resolved;
+	public class LazyWhereStatement extends WhereStatement implements Lazy {
 		private final QueryContext query;
-		private final LazyResolver<T> resolver;
-		private WhereStatement resolvedWhere;
+		private final LazyResolver<WhereStatement> resolver;
+		private WhereStatement resolved = null;
 
-		private LazyWhereStatement(QueryContext query, LazyResolver<T> resolver) {
+		private LazyWhereStatement(QueryContext query, LazyResolver<WhereStatement> resolver) {
 			this.query = query;
 			this.resolver = resolver;
 		}
 
 		@Override
 		public boolean isResolved() {
-			return resolved;
+			return resolved != null;
 		}
 
 		@Override
@@ -129,12 +126,12 @@ public class SQLTreeWalker extends SQLBaseListener {
 		}
 
 		public WhereStatement getResolved() {
-			return resolvedWhere;
+			return resolved;
 		}
 
 		@Override
 		public void setResolvedData(String data) {
-			resolvedWhere = resolver.resolve(data);
+			resolved = resolver.resolve(data);
 		}
 
 	}
@@ -149,7 +146,7 @@ public class SQLTreeWalker extends SQLBaseListener {
 
 	private final SQLData mainData = new SQLData();
 
-	private final Map<QueryContext, SQLData> relations = new HashMap<QueryContext, SQLData>();
+	private final Map<QueryContext, SQLData> relations = new HashMap<>();
 
 	public void enterQuery(SQLParser.QueryContext ctx) {
 		SQLData data;
@@ -184,11 +181,11 @@ public class SQLTreeWalker extends SQLBaseListener {
 		GroupedWhereClauseContext groupedWhere = whereExpr.groupedWhereClause();
 		if (clause != null) {
 			if (clause.children.get(2) instanceof SubQueryContext) {
-				return new LazyWhereStatement<WhereClause>(((SubQueryContext) clause.children.get(2)).query(),
+				return new LazyWhereStatement(((SubQueryContext) clause.children.get(2)).query(),
 						(data) -> new WhereClause(clause.children.get(0).getText(), clause.children.get(1).getText(),
 								data));
 			} else if (clause.children.get(2) instanceof QueryContext) {
-				return new LazyWhereStatement<WhereClause>((QueryContext) clause.children.get(2),
+				return new LazyWhereStatement((QueryContext) clause.children.get(2),
 						(data) -> new WhereClause(clause.children.get(0).getText(), clause.children.get(1).getText(),
 								data));
 			} else {

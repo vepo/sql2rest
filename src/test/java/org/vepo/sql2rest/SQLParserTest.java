@@ -7,6 +7,8 @@ import static org.vepo.sql2rest.SQL2Rest.process;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.vepo.sql2rest.SQLTreeWalker.Lazy;
+import org.vepo.sql2rest.SQLTreeWalker.SQLData;
 import org.vepo.sql2rest.exceptions.DependencyNotResolvedException;
 import org.vepo.sql2rest.exceptions.SyntaxException;
 
@@ -34,7 +36,13 @@ public class SQLParserTest {
 
 	@Test
 	void subQueryTest() throws SyntaxException {
-		assertThrows(DependencyNotResolvedException.class, () -> assertEquals("/device?search=id:2",
-				toRest(process("SELECT * FROM Device WHERE id = (SELECT id FROM MCI)"))));
+		SQLData data = process("SELECT * FROM Device WHERE id = (SELECT id FROM MCI)");
+		assertThrows(DependencyNotResolvedException.class, () -> toRest(data));
+		
+		assertEquals("/mci", toRest(data.getDependencies().stream().findFirst().get()));
+		// TODO  Set direct on dependency. The developer should not know what WhereStatement is.
+		((Lazy) data.getWhereStatement().get()).setResolvedData("2");
+		
+		assertEquals("/device?search=id:2", toRest(data));
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.vepo.sql2rest.SQLTreeWalker.GroupWhereStatement;
 import org.vepo.sql2rest.SQLTreeWalker.Joiner;
 import org.vepo.sql2rest.SQLTreeWalker.Lazy;
+import org.vepo.sql2rest.SQLTreeWalker.LazyWhereStatement;
 import org.vepo.sql2rest.SQLTreeWalker.ListWhereStatement;
 import org.vepo.sql2rest.SQLTreeWalker.SQLData;
 import org.vepo.sql2rest.SQLTreeWalker.WhereClause;
@@ -32,10 +33,13 @@ public class Resolver {
 	}
 
 	private static String toRest(WhereStatement whereStatement) {
-		if (whereStatement instanceof Lazy && !((Lazy) whereStatement).isResolved()) {
-			throw new DependencyNotResolvedException();
-		}
-		if (whereStatement instanceof GroupWhereStatement) {
+		if (whereStatement instanceof LazyWhereStatement) {
+			if (!((Lazy) whereStatement).isResolved()) {
+				throw new DependencyNotResolvedException();
+			} else {
+				return toRest(((LazyWhereStatement) whereStatement).getResolved());
+			}
+		} else if (whereStatement instanceof GroupWhereStatement) {
 			return "( " + toRest(((GroupWhereStatement) whereStatement).getWhere()) + " )";
 		} else if (whereStatement instanceof ListWhereStatement) {
 			List<Joiner> joiners = ((ListWhereStatement) whereStatement).getJoiner();
