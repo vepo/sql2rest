@@ -1,18 +1,21 @@
-package org.vepo;
+package org.vepo.sql2rest;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.vepo.SQLTreeWalker.GroupWhereStatement;
-import org.vepo.SQLTreeWalker.Joiner;
-import org.vepo.SQLTreeWalker.ListWhereStatement;
-import org.vepo.SQLTreeWalker.SQLData;
-import org.vepo.SQLTreeWalker.WhereClause;
-import org.vepo.SQLTreeWalker.WhereStatement;
+import org.vepo.sql2rest.SQLTreeWalker.GroupWhereStatement;
+import org.vepo.sql2rest.SQLTreeWalker.Joiner;
+import org.vepo.sql2rest.SQLTreeWalker.Lazy;
+import org.vepo.sql2rest.SQLTreeWalker.ListWhereStatement;
+import org.vepo.sql2rest.SQLTreeWalker.SQLData;
+import org.vepo.sql2rest.SQLTreeWalker.WhereClause;
+import org.vepo.sql2rest.SQLTreeWalker.WhereStatement;
+import org.vepo.sql2rest.exceptions.DependencyNotResolvedException;
 
 public class Resolver {
 	/**
 	 * http://www.baeldung.com/rest-api-query-search-or-operation
+	 * 
 	 * @param data
 	 * @return
 	 */
@@ -26,10 +29,12 @@ public class Resolver {
 		} else {
 			return "";
 		}
-
 	}
 
 	private static String toRest(WhereStatement whereStatement) {
+		if (whereStatement instanceof Lazy && !((Lazy) whereStatement).isResolved()) {
+			throw new DependencyNotResolvedException();
+		}
 		if (whereStatement instanceof GroupWhereStatement) {
 			return "( " + toRest(((GroupWhereStatement) whereStatement).getWhere()) + " )";
 		} else if (whereStatement instanceof ListWhereStatement) {

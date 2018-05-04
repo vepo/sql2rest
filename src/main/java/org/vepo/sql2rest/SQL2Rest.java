@@ -1,11 +1,14 @@
-package org.vepo;
+package org.vepo.sql2rest;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.vepo.SQLTreeWalker.SQLData;
+import org.vepo.sql2rest.SQLLexer;
+import org.vepo.sql2rest.SQLParser;
+import org.vepo.sql2rest.SQLTreeWalker.SQLData;
+import org.vepo.sql2rest.exceptions.SyntaxException;
 
 public class SQL2Rest {
 	/**

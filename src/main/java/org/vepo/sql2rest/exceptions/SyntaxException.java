@@ -1,4 +1,4 @@
-package org.vepo;
+package org.vepo.sql2rest.exceptions;
 
 public class SyntaxException extends Exception {
 

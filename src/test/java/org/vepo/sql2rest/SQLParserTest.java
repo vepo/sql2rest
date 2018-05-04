@@ -1,12 +1,14 @@
-package org.vepo;
+package org.vepo.sql2rest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.vepo.SQL2Rest.process;
+import static org.vepo.sql2rest.Resolver.toRest;
+import static org.vepo.sql2rest.SQL2Rest.process;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import static org.vepo.Resolver.toRest;
+import org.vepo.sql2rest.exceptions.DependencyNotResolvedException;
+import org.vepo.sql2rest.exceptions.SyntaxException;
 
 @Tag("basic")
 public class SQLParserTest {
@@ -32,6 +34,7 @@ public class SQLParserTest {
 
 	@Test
 	void subQueryTest() throws SyntaxException {
-		assertEquals("/device?search=id:2", toRest(process("SELECT * FROM Device WHERE id = (SELECT id FROM MCI)")));
+		assertThrows(DependencyNotResolvedException.class, () -> assertEquals("/device?search=id:2",
+				toRest(process("SELECT * FROM Device WHERE id = (SELECT id FROM MCI)"))));
 	}
 }
