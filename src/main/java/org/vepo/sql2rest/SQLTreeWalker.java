@@ -69,6 +69,14 @@ public class SQLTreeWalker extends SQLBaseListener {
 		public Set<SQLData> getDependencies() {
 			return new HashSet<>(dependencies);
 		}
+
+		public void setData(String data) {
+			relations.entrySet().forEach(entry -> {
+				if (entry.getValue() == this) {
+					toResolveMap.get(entry.getKey()).setResolvedData(data);
+				}
+			});
+		}
 	}
 
 	public class WhereClause extends WhereStatement {
@@ -148,6 +156,8 @@ public class SQLTreeWalker extends SQLBaseListener {
 
 	private final Map<QueryContext, SQLData> relations = new HashMap<>();
 
+	private final Map<QueryContext, LazyWhereStatement> toResolveMap = new HashMap<>();
+
 	public void enterQuery(SQLParser.QueryContext ctx) {
 		SQLData data;
 		if (ctx.getParent() == null) {
@@ -181,13 +191,17 @@ public class SQLTreeWalker extends SQLBaseListener {
 		GroupedWhereClauseContext groupedWhere = whereExpr.groupedWhereClause();
 		if (clause != null) {
 			if (clause.children.get(2) instanceof SubQueryContext) {
-				return new LazyWhereStatement(((SubQueryContext) clause.children.get(2)).query(),
+				LazyWhereStatement where = new LazyWhereStatement(((SubQueryContext) clause.children.get(2)).query(),
 						(data) -> new WhereClause(clause.children.get(0).getText(), clause.children.get(1).getText(),
 								data));
+				toResolveMap.put(((SubQueryContext) clause.children.get(2)).query(), where);
+				return where;
 			} else if (clause.children.get(2) instanceof QueryContext) {
-				return new LazyWhereStatement((QueryContext) clause.children.get(2),
+				LazyWhereStatement where = new LazyWhereStatement((QueryContext) clause.children.get(2),
 						(data) -> new WhereClause(clause.children.get(0).getText(), clause.children.get(1).getText(),
 								data));
+				toResolveMap.put((QueryContext) clause.children.get(2), where);
+				return where;
 			} else {
 				return new WhereClause(clause.children.get(0).getText(), clause.children.get(1).getText(),
 						clause.children.get(2).getText());
