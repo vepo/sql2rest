@@ -1,6 +1,7 @@
 package org.vepo.sql2rest;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +57,8 @@ public class SQLTreeWalker extends SQLBaseListener {
 	public class SQLData {
 		private Optional<WhereStatement> whereStatement;
 		private String tableName;
+		private List<String> fields;
+		private boolean allFields;
 		private Set<SQLData> dependencies = new HashSet<>();
 
 		public String getTableName() {
@@ -76,6 +79,14 @@ public class SQLTreeWalker extends SQLBaseListener {
 					toResolveMap.get(entry.getKey()).setResolvedData(data);
 				}
 			});
+		}
+
+		public boolean isAllFields() {
+			return allFields;
+		}
+
+		public List<String> getFields() {
+			return fields;
 		}
 	}
 
@@ -168,6 +179,13 @@ public class SQLTreeWalker extends SQLBaseListener {
 		}
 		relations.put(ctx, data);
 		data.tableName = ctx.tableName().getText();
+		if (ctx.fields().STAR() != null) {
+			data.allFields = true;
+			data.fields = Collections.emptyList();
+		} else {
+			data.allFields = false;
+			data.fields = ctx.fields().field().stream().map(fc -> fc.getText()).collect(Collectors.toList());
+		}
 		if (null != ctx.whereExpr()) {
 			data.whereStatement = Optional.of(process(ctx.whereExpr()));
 		} else {

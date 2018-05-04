@@ -36,7 +36,7 @@ public class SQLParserTest {
 
 	@Test
 	void subQueryTest() throws SyntaxException {
-		SQLData data = process("SELECT * FROM Device WHERE id = (SELECT id FROM MCI)");
+		SQLData data = process("SELECT * FROM Device WHERE id = (SELECT * FROM MCI)");
 		assertThrows(DependencyNotResolvedException.class, () -> toRest(data));
 
 		SQLData dep = data.getDependencies().stream().findFirst().get();
@@ -45,5 +45,11 @@ public class SQLParserTest {
 		dep.setData("2");
 
 		assertEquals("/device?search=id:2", toRest(data));
+	}
+
+	@Test
+	void fieldsTest() throws SyntaxException {
+		assertEquals("/device?fields=id,name", toRest(process("SELECT id, name FROM Device")));
+
 	}
 }

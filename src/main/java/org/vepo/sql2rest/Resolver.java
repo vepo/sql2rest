@@ -1,7 +1,9 @@
 package org.vepo.sql2rest;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.vepo.sql2rest.SQLTreeWalker.GroupWhereStatement;
 import org.vepo.sql2rest.SQLTreeWalker.Joiner;
@@ -21,14 +23,25 @@ public class Resolver {
 	 * @return
 	 */
 	public static String toRest(SQLData data) {
-		return "/" + data.getTableName().toLowerCase() + toRest(data.getWhereStatement());
+		// TODO Ugly code!
+		List<String> parameters = Arrays.asList(toRest(data.getWhereStatement()), fields2Rest(data));
+		return "/" + data.getTableName().toLowerCase() + (parameters.stream().filter(p -> p != null).count() == 0L ? ""
+				: '?' + parameters.stream().filter(p -> p != null).collect(Collectors.joining("&")));
+	}
+
+	private static String fields2Rest(SQLData data) {
+		if (!data.isAllFields() && !data.getFields().isEmpty()) {
+			return "fields=" + data.getFields().stream().collect(Collectors.joining(","));
+		} else {
+			return null;
+		}
 	}
 
 	private static String toRest(Optional<WhereStatement> whereStatement) {
 		if (whereStatement.isPresent()) {
-			return "?search=" + toRest(whereStatement.get());
+			return "search=" + toRest(whereStatement.get());
 		} else {
-			return "";
+			return null;
 		}
 	}
 
