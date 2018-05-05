@@ -73,6 +73,14 @@ public class SQLTreeWalker extends SQLBaseListener {
 			return new HashSet<>(dependencies);
 		}
 
+		public void setData(Number data) {
+			relations.entrySet().forEach(entry -> {
+				if (entry.getValue() == this) {
+					toResolveMap.get(entry.getKey()).setResolvedData(data);
+				}
+			});
+		}
+
 		public void setData(String data) {
 			relations.entrySet().forEach(entry -> {
 				if (entry.getValue() == this) {
@@ -150,8 +158,20 @@ public class SQLTreeWalker extends SQLBaseListener {
 
 		@Override
 		public void setResolvedData(String data) {
-			resolved = resolver.resolve(data);
+			resolved = resolver.resolve('\'' + data.replaceAll("'", "\\'") + '\'');
 		}
+
+		@Override
+		public void setResolvedData(Number data) {
+			resolved = resolver.resolve(data.toString());
+		}
+
+		// TODO not now
+		// @Override
+		// public <T> void setResolvedData(List<T> data) {
+		// if()
+		// resolved = resolver.resolve(data.toString());
+		// }
 
 	}
 
@@ -161,6 +181,11 @@ public class SQLTreeWalker extends SQLBaseListener {
 		public SQLData getResolverData();
 
 		public void setResolvedData(String data);
+
+		public void setResolvedData(Number data);
+
+		// TODO not now
+		// public <T> void setResolvedData(List<T> data);
 	}
 
 	private final SQLData mainData = new SQLData();

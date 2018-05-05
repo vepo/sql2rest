@@ -1,7 +1,9 @@
 package org.vepo.sql2rest;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,20 +18,38 @@ import org.vepo.sql2rest.SQLTreeWalker.WhereStatement;
 import org.vepo.sql2rest.exceptions.DependencyNotResolvedException;
 
 public class Resolver {
+	private Map<String, String> dataSourceMapper;
+
+	private Resolver(Map<String, String> dataSourceMapper) {
+		this.dataSourceMapper = dataSourceMapper;
+	}
+
+	public static Resolver get(Map<String, String> dataSourceMapper) {
+		return new Resolver(dataSourceMapper);
+	}
+
+	public static Resolver get() {
+		return new Resolver(new HashMap<>());
+	}
+
 	/**
 	 * http://www.baeldung.com/rest-api-query-search-or-operation
 	 * 
 	 * @param data
 	 * @return
 	 */
-	public static String toRest(SQLData data) {
+	public String toRest(SQLData data) {
 		// TODO Ugly code!
 		List<String> parameters = Arrays.asList(toRest(data.getWhereStatement()), fields2Rest(data));
-		return "/" + data.getTableName().toLowerCase() + (parameters.stream().filter(p -> p != null).count() == 0L ? ""
+		return getTableName(data.getTableName()) + (parameters.stream().filter(p -> p != null).count() == 0L ? ""
 				: '?' + parameters.stream().filter(p -> p != null).collect(Collectors.joining("&")));
 	}
 
-	private static String fields2Rest(SQLData data) {
+	private String getTableName(String tableName) {
+		return dataSourceMapper.computeIfAbsent(tableName, (t) -> "/" + t.toLowerCase());
+	}
+
+	private String fields2Rest(SQLData data) {
 		if (!data.isAllFields() && !data.getFields().isEmpty()) {
 			return "fields=" + data.getFields().stream().collect(Collectors.joining(","));
 		} else {
@@ -37,7 +57,7 @@ public class Resolver {
 		}
 	}
 
-	private static String toRest(Optional<WhereStatement> whereStatement) {
+	private String toRest(Optional<WhereStatement> whereStatement) {
 		if (whereStatement.isPresent()) {
 			return "search=" + toRest(whereStatement.get());
 		} else {
@@ -45,7 +65,7 @@ public class Resolver {
 		}
 	}
 
-	private static String toRest(WhereStatement whereStatement) {
+	private String toRest(WhereStatement whereStatement) {
 		if (whereStatement instanceof LazyWhereStatement) {
 			if (!((Lazy) whereStatement).isResolved()) {
 				throw new DependencyNotResolvedException();
