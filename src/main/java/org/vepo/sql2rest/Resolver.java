@@ -35,8 +35,8 @@ public class Resolver {
 	/**
 	 * http://www.baeldung.com/rest-api-query-search-or-operation
 	 * 
-	 * @param data
-	 * @return
+	 * @param data SQL data
+	 * @return URL String
 	 */
 	public String toRest(SQLData data) {
 		// TODO Ugly code!

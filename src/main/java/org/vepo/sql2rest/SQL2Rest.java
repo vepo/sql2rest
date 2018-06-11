@@ -12,8 +12,9 @@ import org.vepo.sql2rest.exceptions.SyntaxException;
 
 public class SQL2Rest {
 	/**
-	 * @param sqlData
-	 * @return
+	 * Process SQL from RAW string
+	 * @param sql SQL content
+	 * @return processed SQL data
 	 */
 	public static SQLData process(String sql) throws SyntaxException {
 		try {
