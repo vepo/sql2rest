@@ -1,6 +1,7 @@
 # SQL2Rest
 
 [![Build Status](https://travis-ci.org/vepo/sql2rest.svg?branch=master)](https://travis-ci.org/vepo/sql2rest)
+[![Build Status](https://sonarcloud.io/api/project_badges/measure?project=org.vepo%3Asql-to-rest&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.vepo%3Asql-to-rest)
 
 A simple SQL Parser that produces Rest queries using Antlr4
 

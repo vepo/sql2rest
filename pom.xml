@@ -62,7 +62,19 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+        <profiles>
+                <profile>
+			<id>sonar</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+				<sonar.organization>victorosorio-bitbucket</sonar.organization>
+				<sonar.login>8f487b54f6e5cb9e9afe07473e29660771e3d306</sonar.login>
+			</properties>
+		</profile>
+        </profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -175,6 +187,19 @@
 						</plugin>
 					</reportPlugins>
 				</configuration>
+			</plugin>
+                        <plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.3.0.603</version>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>sonar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
