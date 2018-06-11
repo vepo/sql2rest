@@ -1,5 +1,7 @@
 # SQL2Rest
 
+[![Build Status](https://travis-ci.org/vepo/sql2rest.svg?branch=master)](https://travis-ci.org/vepo/sql2rest)
+
 A simple SQL Parser that produces Rest queries using Antlr4
 
 ## Examples
