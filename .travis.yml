@@ -1,2 +1,9 @@
 language: java
 
+addons:
+  sonarcloud:
+    organization: "vepo"
+    token:
+      secure: "ALgYgNfWJZitKJHoev0Ckp+7J2jhS5NWsdFl1qDgku3OXMC1u5ZaCh1BVZmN1X4OZ2VTdXFJLn5c6s+9w0NECdPJcbh9jBOCeeVntNEXu/b6fLQyg3iMl7yzWYEyLW/0dizszql44lXZ1k2mFd97IAUablEdN+c19lvDseEcGjdmlrS1d0NtPQCwqoIYZBtc5P7lJOrMoBWBHOhQ3YYVMOeJOcFulXMotk1MJ5JFTIMZyZEQ/V/qH+os0Kr7mrJbvLkE3bUnw9ydh2pH+bQwb8KDVJUhDb1ygJADerWAss0PtEL4ghJaOayhop7GECW09TFACPbPaqvhAsrW9b9P40k+ShWcMUSpyAT7XoTDZUYt8WzJpA0XCtyMOTvB/CDM9wQArQYEFR/4ygTUJ4A/ior8QiWPlIRRmXkDaNqIUM+JMbZgmgEV88NWv2XajvxoQQxmvCNj8Adax/LnbzqipQvHo+WCmNsmOsYaux222yHov2z24ty/Z0dTNQWQkVA62Awmhw1rZlDQl0sVMV0+Oz/zmZKDox0X1SOy/tnKRpijKA5qb8c0UBGPPzOIlYpHV95QcoBmmE6rapJ4DQCTbFweyONLbOyj521XN3GaBKKgnIn6aCMFl2JfIsSZ+D2TCqyRnMZ6QC/rLusWFvHseDdsPFAXSIuNQ52gBzjr9Dw="
+script:
+  - mvn clean install sonar:sonar
