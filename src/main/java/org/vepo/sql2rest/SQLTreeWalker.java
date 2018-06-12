@@ -75,9 +75,8 @@ public class SQLTreeWalker extends SQLBaseListener {
 
 		public void setData(Number data) {
 			relations.entrySet().forEach(entry -> {
-				if (entry.getValue() == this) {
+				if (entry.getValue() == this)
 					toResolveMap.get(entry.getKey()).setResolvedData(data);
-				}
 			});
 		}
 
